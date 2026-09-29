@@ -1,0 +1,37 @@
+name: assemble-drive-import
+on:
+  push:
+    branches: [import/drive-2026-06-13]
+permissions:
+  contents: write
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify and extract audited snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s  %s\n' '5cb8c2df63ff554c18d9446ac1161c2c9ea45d51c119e07581bbd43ac63e619b' '.migration_payload/archive.tar.gz' | sha256sum -c -
+          tar -xzf .migration_payload/archive.tar.gz -C .
+          rm -rf .migration_payload
+          rm .github/workflows/assemble-drive-import.yml
+          python -m compileall -q .
+          python -m json.tool tools.json >/dev/null
+          python -m json.tool diccionario_minero.json >/dev/null
+          bash -n instalar_modulos_linux_pi.sh
+          if grep -RInE --exclude-dir=.git --exclude='MIGRATION_MANIFEST.md' '(ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AIza[0-9A-Za-z_-]{20,}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|password[[:space:]]*=[[:space:]]*["'"'][^"'"']+["'"']|api[_-]?key[[:space:]]*=[[:space:]]*["'"'][^"'"']+["'"'])' .; then
+            echo 'Potential secret pattern detected'; exit 1
+          fi
+      - name: Commit assembled snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Assemble audited Ultimate Agent Drive snapshot'
+          git push
