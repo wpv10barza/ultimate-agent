@@ -89,11 +89,10 @@ def procesar_cola_logs():
 
             elif tipo == "resultado":
                 res_text, resultados, auditoria = item[1], item[2], item[3]
-                res_tts = item[4] if len(item) > 4 else res_text
                 global resultados_globales, auditoria_global, ultima_respuesta_tts
                 resultados_globales = resultados
                 auditoria_global = auditoria
-                ultima_respuesta_tts = res_tts
+                ultima_respuesta_tts = res_text
 
                 lbl_resumen.config(text=res_text, fg=COLOR_BORDE_AZUL)
                 btn_full.config(state=tk.NORMAL)
@@ -276,91 +275,6 @@ def _estado_modelo(auditoria, clave):
     return datos.get("estado", "no ejecutado")
 
 
-def _buscar_resultado_tabla(resultados, parametro_objetivo):
-    """Busca un resultado por nombre exacto dentro de la tabla final PARAMETRO/UND/VALOR."""
-    if not isinstance(resultados, dict):
-        return None, None
-
-    params = resultados.get("Parametros", [])
-    unidades = resultados.get("Unidad", [])
-    valores = resultados.get("Total", [])
-    for nombre, unidad, valor in zip(params, unidades, valores):
-        if str(nombre).strip().lower() == parametro_objetivo.strip().lower():
-            return unidad, valor
-    return None, None
-
-
-def _formatear_valor(valor):
-    """Formatea valores sin perder precision visual de la tabla completa."""
-    try:
-        numero = float(valor)
-    except Exception:
-        return str(valor)
-
-    if abs(numero) >= 100:
-        return f"{numero:.2f}"
-    if abs(numero) >= 10:
-        return f"{numero:.3f}".rstrip("0").rstrip(".")
-    return f"{numero:.3f}".rstrip("0").rstrip(".")
-
-
-def _unidad_para_voz(unidad):
-    """Convierte abreviaturas de unidad en texto natural para no deletrear kg/m3 o kg/Ton."""
-    mapa = {
-        "Kg": "kilogramos por taladro",
-        "kg": "kilogramos por taladro",
-        "Kg/Tal": "kilogramos por taladro",
-        "kg/tal": "kilogramos por taladro",
-        "Kg/m3": "kilogramos por metro cubico",
-        "kg/m3": "kilogramos por metro cubico",
-        "Kg/m": "kilogramos por metro",
-        "kg/m": "kilogramos por metro",
-        "Kg/Ton": "kilogramos por tonelada",
-        "kg/Ton": "kilogramos por tonelada",
-        "cm": "centimetros",
-        "m": "metros",
-        "mm": "milimetros",
-        "Ton": "toneladas",
-        "Ton/m3": "toneladas por metro cubico",
-        "MPa": "megapascales",
-    }
-    return mapa.get(str(unidad).strip(), str(unidad).strip())
-
-
-def generar_codigo_respuesta(resultados, auditoria):
-    """
-    Genera la respuesta resumida desde la tabla completa, no desde abreviaturas.
-    Se usa para pantalla, logica de API y altavoz.
-    """
-    filas = [
-        ("Carga Operante", "Carga Operante (Kg/Tal)"),
-        ("FACTOR DE CARGA", "FACTOR DE CARGA"),
-        ("FACTOR DE CARGA LINEAL", "FACTOR DE CARGA LINEAL"),
-        ("FACTOR DE POTENCIA", "FACTOR DE POTENCIA"),
-        ("Fragmentacion X50", "Fragmentacion X50"),
-    ]
-
-    lineas = []
-    partes_tts = ["Resultados de voladura."]
-    for etiqueta, nombre_tabla in filas:
-        unidad, valor = _buscar_resultado_tabla(resultados, nombre_tabla)
-        if valor is None:
-            continue
-        valor_txt = _formatear_valor(valor)
-        unidad_txt = str(unidad or "").strip()
-        lineas.append(f"{etiqueta:<25} | {unidad_txt:<6} | {valor_txt}")
-        partes_tts.append(f"{etiqueta.title()}: {valor_txt} {_unidad_para_voz(unidad_txt)}.")
-
-    estado_functiongemma = _estado_modelo(auditoria, "functiongemma")
-    estado_qwen = _estado_modelo(auditoria, "qwen3.5:4b")
-    lineas.append(f"IA Local: functiongemma={estado_functiongemma} | qwen3.5:4b={estado_qwen}")
-    partes_tts.append(
-        f"IA local: functiongemma {estado_functiongemma}; qwen tres punto cinco, cuatro b, {estado_qwen}."
-    )
-
-    return "\n".join(lineas), " ".join(partes_tts)
-
-
 def calcular_voladura_worker(parametros):
     """Hilo de calculo: audita con Ollama y ejecuta formulas sin congelar Tkinter."""
     try:
@@ -384,9 +298,20 @@ def calcular_voladura_worker(parametros):
         escribir_log("[LOG - MATH]: Ejecutando nucleo Kuz-Ram deterministico...")
         resultados, indicadores = ejecutar_nucleo_kuzram(parametros)
 
-        res_text, res_tts = generar_codigo_respuesta(resultados, auditoria)
+        estado_functiongemma = _estado_modelo(auditoria, "functiongemma")
+        estado_qwen = _estado_modelo(auditoria, "qwen3.5:4b")
 
-        log_queue.put(("resultado", res_text, resultados, auditoria, res_tts))
+        res_text = (
+            f"FC: {indicadores['fc_volumetrico']:.2f} kg/m3\n"
+            f"FC Lineal: {indicadores['fc_lineal']:.2f} kg/m\n"
+            f"F. Potencia: {indicadores['factor_potencia']:.2f} kg/Ton\n"
+            f"P. Exp: {indicadores['peso_explosivo_taladro']:.2f} kg/tal\n"
+            f"Burden: {indicadores['burden']:.2f} m | Esp.: {indicadores['espaciamiento']:.2f} m\n"
+            f"X50: {indicadores['x50_cm']:.1f} cm\n"
+            f"IA Local: functiongemma={estado_functiongemma} | qwen3.5:4b={estado_qwen}"
+        )
+
+        log_queue.put(("resultado", res_text, resultados, auditoria))
 
     except Exception as exc:
         detalle = f"{exc}\n\n{traceback.format_exc()}"
@@ -737,11 +662,6 @@ def reproducir_ultima_respuesta():
     """Repite por tts_piper.py la ultima respuesta visible."""
     global ultima_respuesta_tts
     texto = ultima_respuesta_tts or lbl_resumen.cget("text")
-    if resultados_globales:
-        try:
-            _, texto = generar_codigo_respuesta(resultados_globales, auditoria_global)
-        except Exception:
-            pass
     if not texto or texto.strip() == "Esperando calculo...":
         messagebox.showwarning("Advertencia", "No hay una respuesta para repetir.")
         return
