@@ -1,0 +1,25 @@
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate Python syntax
+        run: python -m compileall -q .
+      - name: Validate JSON
+        run: |
+          python -m json.tool tools.json >/dev/null
+          python -m json.tool diccionario_minero.json >/dev/null
+      - name: Validate shell syntax
+        run: bash -n instalar_modulos_linux_pi.sh
+      - name: Secret-pattern guard
+        run: |
+          if grep -RIE --exclude-dir=.git --exclude-dir=.github --exclude='MIGRATION_MANIFEST.md' '(-----BEGIN .*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9_]+|AIza[0-9A-Za-z_-]{20,}|sk-[A-Za-z0-9_-]{20,}|api[_-]?key[[:space:]]*=[[:space:]]*[^<[:space:]]+|password[[:space:]]*=[[:space:]]*[^<[:space:]]+)' .; then
+            echo 'Potential secret detected'; exit 1
+          fi

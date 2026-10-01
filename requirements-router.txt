@@ -1,0 +1,3 @@
+# Optional semantic routing.
+# Install only if you want semantic routing between local LLMs.
+semantic-router[local]>=0.1.0
