@@ -1,0 +1,39 @@
+CORRECCION API / FUNCTIONGEMMA V4
+=================================
+
+Problema corregido:
+La aplicacion calculaba correctamente con los parametros del formulario, pero la auditoria IA mostraba:
+functiongemma: advertencia
+Por favor, especifica los parametros para calcular la voladura.
+
+Causa:
+functiongemma no siempre devuelve tool_call cuando recibe los datos desde el formulario o desde una tabla ya calculada.
+
+Correccion aplicada:
+1. tool_ai.py ahora puede leer parametros desde:
+   - formulario Tkinter,
+   - texto/transcripcion de voz,
+   - logs tipo ancho=4.0, avance=1.5,
+   - tabla PARAMETRO | UND | VALOR de Resultados Detallados,
+   - JSON/EJECUTAR_CALCULO.
+
+2. Si los 6 parametros obligatorios estan completos, se genera payload API:
+   {
+     "tool": "calcular_voladura",
+     "arguments": {...},
+     "missing": []
+   }
+
+3. La auditoria ya no marca advertencia falsa cuando los datos ya existen.
+   Debe mostrar:
+   functiongemma: ok
+   validacion_local: ok
+   payload_api: ok
+
+4. En Resultados Detallados se muestra el Payload JSON API para integracion externa.
+
+Prueba rapida:
+python tool_ai.py "Ancho Seccion (Ref) | m | 4.0\nLongitud Avance | m | 1.5\nDiametro Taladro | mm | 45\nResistencia Roca | MPa | 120\nDensidad Explosivo | kg/m3 | 1100\nDensidad Roca | Ton/m3 | 2.7"
+
+Ejecucion normal:
+python app.py

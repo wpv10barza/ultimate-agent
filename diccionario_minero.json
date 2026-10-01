@@ -1,0 +1,63 @@
+{
+  "ancho_seccion": {
+    "sinonimos": [
+      "ancho de seccion",
+      "seccion",
+      "labor",
+      "rampa",
+      "frente",
+      "ancho del tajo"
+    ],
+    "unidad_estandar": "m"
+  },
+  "avance": {
+    "sinonimos": [
+      "avance",
+      "tiro",
+      "longitud de avance",
+      "profundidad de avance",
+      "avance esperado"
+    ],
+    "unidad_estandar": "m"
+  },
+  "diametro_taladro": {
+    "sinonimos": [
+      "diametro del taladro",
+      "taladro",
+      "broca",
+      "perforacion",
+      "diametro de perforacion"
+    ],
+    "unidad_estandar": "mm"
+  },
+  "densidad_explosivo": {
+    "sinonimos": [
+      "densidad del explosivo",
+      "densidad de anfo",
+      "anfo",
+      "emulsion",
+      "rho explosivo"
+    ],
+    "unidad_estandar": "g/cm3"
+  },
+  "densidad_roca": {
+    "sinonimos": [
+      "densidad de roca",
+      "roca pesa",
+      "peso especifico de roca",
+      "rho roca",
+      "toneladas por metro cubico"
+    ],
+    "unidad_estandar": "t/m3"
+  },
+  "resistencia_roca": {
+    "sinonimos": [
+      "resistencia de roca",
+      "compresion simple",
+      "UCS",
+      "fuerza de roca",
+      "roca dura"
+    ],
+    "unidad_estandar": "MPa"
+  }
+}
