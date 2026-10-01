@@ -1,0 +1,55 @@
+name: verify-canonical-transfer
+on:
+  push:
+    branches: [staging/ua-canonical-transfer]
+permissions:
+  contents: write
+jobs:
+  verify-and-assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Decode and verify transfer payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          for n in 00 01 02 03 04 05; do
+            base64 -d ".migration_payload_b64/part-${n}.b64" > "/tmp/ua_part_${n}"
+          done
+          printf '%s  %s\n' '579222c130bbf00122800db916a454330969d4536e18d88740be34620b5aeae4' '/tmp/ua_part_00' | sha256sum -c -
+          printf '%s  %s\n' '003a57de7bc1b3af8e80478961f4c2f2ae95f5de988d03d99e870580f8eeb8d9' '/tmp/ua_part_01' | sha256sum -c -
+          printf '%s  %s\n' 'b925361d1ecb0efb6a61142389eb20052e1e23c27f0ca7ab87662ac89a74bc51' '/tmp/ua_part_02' | sha256sum -c -
+          printf '%s  %s\n' '6c0c250d7785053bf09026f7c16db9c6a4706f32c41166c793088c359d1b762c' '/tmp/ua_part_03' | sha256sum -c -
+          printf '%s  %s\n' '950c418c42dba0a3a029d2d36d9309b0585cf89b1c0a00ce3418aae4acee526f' '/tmp/ua_part_04' | sha256sum -c -
+          printf '%s  %s\n' 'd4b776052377c4d7de3e3c705f16623c887fcd60205d323245a5612124524d66' '/tmp/ua_part_05' | sha256sum -c -
+          cat /tmp/ua_part_00 /tmp/ua_part_01 /tmp/ua_part_02 /tmp/ua_part_03 /tmp/ua_part_04 /tmp/ua_part_05 > /tmp/ultimate-agent-canonical.tar.gz
+          printf '%s  %s\n' 'c5863864ced9b27e4a3d8fa6235de0297332df3bb2e88118840c62875bede1ab' '/tmp/ultimate-agent-canonical.tar.gz' | sha256sum -c -
+          tar -tzf /tmp/ultimate-agent-canonical.tar.gz >/tmp/archive-list.txt
+      - name: Assemble canonical snapshot and validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -xzf /tmp/ultimate-agent-canonical.tar.gz -C .
+          rm -rf .migration_payload .migration_payload_b64
+          rm -f .github/workflows/assemble-drive-import.yml
+          rm -f .github/workflows/verify-canonical-transfer.yml
+          rm -f TRANSFER_NOTE.txt
+          python -m compileall -q app.py tool_ai.py tts_piper.py verificar_entorno.py pretraining_status.py generar_training_data.py
+          python -m json.tool tools.json >/dev/null
+          python -m json.tool diccionario_minero.json >/dev/null
+          bash -n instalar_modulos_linux_pi.sh
+          rm -rf __pycache__
+          if grep -RInE --exclude-dir=.git --exclude='MIGRATION_MANIFEST.md' '(ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AIza[0-9A-Za-z_-]{20,}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|C:\\Users\\|D:\\118102025)' .; then
+            echo 'Potential secret or personal local path detected'; exit 1
+          fi
+      - name: Commit verified canonical snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Assemble verified Ultimate Agent canonical snapshot'
+          git push
