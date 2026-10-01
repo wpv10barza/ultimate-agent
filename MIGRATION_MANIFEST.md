@@ -7,16 +7,14 @@
 - version_current: `Drive snapshot 2026-06-13 (V9 documentation present)`
 - version_legacy: `Drive snapshot 2026-06-12`
 - github_repository: `wpv10barza/ultimate-agent`
-- github_branch: `main`
-- github_commit: `a559102bd9cb1e2d3920211e1a3fcdb1cf093234`
+- github_branch: `import/drive-2026-06-13`
+- github_commit: pendiente hasta verificación final
 - files_expected_current: `26`
 - files_migrated_current: `26`
-- verification_status: `VERIFIED`
-- verified_at: `2026-10-01T04:21:06Z`
+- verification_status: `PENDING_GITHUB_CI`
+- verified_at: pendiente
 - deletion_allowed: `FALSE`
 - drive_status: `CONSERVADO`
-- main_ci_run: `36814694565` (`success`)
-- maintenance_head_verified: `da3111293dd4eb84ee00271f62c883f6c159bbee`
 
 ## Genealogía
 
