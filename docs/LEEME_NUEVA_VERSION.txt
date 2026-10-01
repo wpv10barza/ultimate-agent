@@ -1,0 +1,47 @@
+MINEXcellence Ultimate Agent - Nueva version con dataset, Excel, microfono y TTS
+
+ARCHIVOS NUEVOS
+1) training_data.jsonl
+   Dataset base tipo JSON Lines para preparar fine-tuning de functiongemma.
+   Incluye ejemplos completos y ejemplos incompletos para que el modelo no invente datos.
+
+2) diccionario_minero.json
+   Sinonimos mineros por variable: broca, taladro, seccion, rampa, ANFO, UCS, etc.
+
+3) pretraining_status.py
+   Indicador local: valida el dataset, cobertura de variables y disponibilidad del modelo en Ollama.
+
+4) ver_preentrenamiento.ps1
+   Indicador PowerShell para visualizar preparacion del modelo y dataset.
+
+5) generar_training_data.py
+   Plantilla para ampliar o regenerar ejemplos JSONL.
+
+CAMBIOS EN app.py
+- Exportacion Excel con selector de archivo.
+- Hoja Parametros_Extraidos, hoja Resultados_KuzRam, hoja Auditoria_IA y resumen Dataset_FT.
+- Boton HABLAR (MIC) para transcribir voz y enviarla a functiongemma.
+- Boton REPETIR VOZ para enviar la ultima respuesta a tts_piper.py.
+- Conversion automatica de densidad_explosivo: si se ingresa 0.8, 1.1, etc., se interpreta como g/cm3 y se convierte a kg/m3 para el calculo.
+
+COMANDOS RECOMENDADOS EN POWERSHELL
+cd "<ruta-local>\ultimate agent"
+python -m venv .venv
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+ollama pull functiongemma
+.\ver_preentrenamiento.ps1
+python verificar_entorno.py
+python app.py
+
+NOTA
+El indicador de preentrenamiento no entrena el modelo. Sirve para visualizar si el dataset y el modelo local estan listos. Para fine-tuning real usa Unsloth, Hugging Face, Google Cloud u otra plataforma, y luego exporta el modelo a Ollama.
+
+V5 - MODULOS DE VOZ Y TTS
+- Agregado tts_piper.py para evitar el error: No module named 'tts_piper'.
+- Agregado PyAudio y pyttsx3 a requirements.txt.
+- Agregado ver_modulos_voz_tts.ps1 como indicador PowerShell de modulos locales.
+- Mejorado el mensaje de error del microfono cuando PyAudio no esta instalado.
+- Agregado instalar_modulos_windows.ps1 para instalar dependencias dentro de .venv.

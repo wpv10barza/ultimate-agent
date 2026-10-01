@@ -1,0 +1,45 @@
+MINEXcellence 2025 - Correccion EXE V9
+=======================================
+
+Problema corregido:
+- El ejecutable se creaba, pero al abrirlo fallaba con:
+  ImportError: No module named app
+
+Causa:
+- El script temporal anterior usaba runpy.run_module("app").
+- PyInstaller no detectaba ese import dinamico y no empaquetaba app.py dentro del EXE.
+
+Correccion V9:
+- CREAR_EXE_WINDOWS.ps1 ahora genera un launcher temporal con import estatico:
+  import app
+- Tambien agrega app.py, tool_ai.py, tts_piper.py, tools.json, training_data.jsonl y diccionario_minero.json al paquete.
+- Elimina EXE viejo antes de compilar para evitar abrir una version anterior.
+
+Uso:
+1) Descomprime o copia estos archivos en la carpeta principal del proyecto.
+2) Abre PowerShell en esa carpeta.
+3) Ejecuta:
+
+   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+   .\CREAR_EXE_WINDOWS.ps1
+
+O usa doble clic en:
+
+   CREAR_EXE_WINDOWS.bat
+
+Resultado esperado:
+   MINEXcellence_2025.exe
+
+Importante:
+- Si ya tenias un MINEXcellence_2025.exe anterior, el script lo borra antes de recompilar.
+- Ollama no se empaqueta dentro del EXE; debe estar instalado y activo en Windows.
+- Para IA local:
+   ollama list
+   ollama pull functiongemma
+   ollama pull qwen3.5:4b
+
+Voz/microfono:
+- PyAudio es opcional.
+- Si quieres microfono dentro del EXE, instala antes:
+   .\.venv\Scripts\python.exe -m pip install -r requirements-voice-windows.txt
+- Si PyAudio no esta instalado, el EXE sigue funcionando para calculo, Excel, TTS y Ollama.

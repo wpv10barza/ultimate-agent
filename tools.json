@@ -1,0 +1,46 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "calcular_voladura",
+      "description": "Extrae los parámetros necesarios para realizar un cálculo de voladura minera.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "ancho_seccion": {
+            "type": "number",
+            "description": "El ancho de la sección en metros."
+          },
+          "avance": {
+            "type": "number",
+            "description": "El avance esperado de la voladura en metros."
+          },
+          "diametro_taladro": {
+            "type": "number",
+            "description": "El diámetro del taladro a utilizar."
+          },
+          "densidad_explosivo": {
+            "type": "number",
+            "description": "La densidad del explosivo en gramos por centímetro cúbico."
+          },
+          "densidad_roca": {
+            "type": "number",
+            "description": "La densidad de la roca a perforar."
+          },
+          "resistencia_roca": {
+            "type": "number",
+            "description": "La resistencia a la compresión de la roca."
+          }
+        },
+        "required": [
+          "ancho_seccion",
+          "avance",
+          "diametro_taladro",
+          "densidad_explosivo",
+          "densidad_roca",
+          "resistencia_roca"
+        ]
+      }
+    }
+  }
+]

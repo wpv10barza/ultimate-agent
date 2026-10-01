@@ -1,0 +1,31 @@
+MINEXcellence 2025 - Correccion V7: lectura de resultados por altavoz
+
+Cambio solicitado:
+- Mantener todas las tareas anteriores igual.
+- Corregir el texto enviado al altavoz/TTS para que no lea unidades abreviadas como k-g-m-3.
+- Ordenar el resumen final usando los resultados de la tabla completa PARAMETRO | UND | VALOR.
+
+Ahora el resumen visible y el texto de voz se generan desde la tabla final:
+- Carga Operante
+- FACTOR DE CARGA
+- FACTOR DE CARGA LINEAL
+- FACTOR DE POTENCIA
+- Fragmentacion X50
+
+Ejemplo de resumen visible:
+Carga Operante           | Kg     | 2.231
+FACTOR DE CARGA          | Kg/m3  | 0.979
+FACTOR DE CARGA LINEAL   | Kg/m   | 1.749
+FACTOR DE POTENCIA       | Kg/Ton | 0.363
+Fragmentacion X50        | cm     | 1106.18
+IA Local: functiongemma=ok | qwen3.5:4b=no ejecutado
+
+Ejemplo de lectura por voz:
+Resultados de voladura. Carga Operante: 2.231 kilogramos por taladro. Factor de carga: 0.979 kilogramos por metro cubico. Factor de carga lineal: 1.749 kilogramos por metro. Factor de potencia: 0.363 kilogramos por tonelada. Fragmentacion X50: 1106.18 centimetros.
+
+Archivo modificado:
+- app.py
+
+Ejecucion:
+cd "<ruta-local>\ultimate agent"
+.\.venv\Scripts\python.exe app.py

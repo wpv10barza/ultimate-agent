@@ -1,0 +1,106 @@
+MINEXcellence V6 - Instalacion corregida de modulos
+====================================================
+
+OBJETIVO
+Esta version corrige la documentacion y los scripts de instalacion para no mezclar
+paquetes del sistema con paquetes del entorno virtual. Tambien separa PyAudio como
+modulo de voz opcional para que requirements.txt no falle cuando PyAudio no compila.
+
+ARCHIVOS NUEVOS O MODIFICADOS
+- requirements.txt
+  Dependencias base: ollama, pandas, openpyxl, pillow, SpeechRecognition y pyttsx3.
+  Ya no instala PyAudio de forma obligatoria.
+
+- requirements-voice-windows.txt
+  Dependencia opcional para el boton HABLAR (MIC): PyAudio.
+
+- requirements-router.txt
+  Dependencia opcional para semantic routing: semantic-router[local].
+
+- instalar_modulos_windows.ps1
+  Instalador recomendado para Windows. Crea .venv, actualiza pip, instala paquetes
+  base y luego intenta instalar PyAudio por separado.
+
+- instalar_modulos_linux_pi.sh
+  Instalador recomendado para Linux/Raspberry Pi. Primero instala portaudio19-dev y
+  python3-pyaudio con apt; luego crea .venv con --system-site-packages.
+
+- verificar_entorno.py y ver_modulos_voz_tts.ps1
+  Marcan PyAudio y semantic-router como opcionales. Si faltan, indican el comando correcto.
+
+INSTALACION WINDOWS RECOMENDADA
+Desde PowerShell dentro de la carpeta del proyecto:
+
+cd "<ruta-local>\ultimate agent"
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\instalar_modulos_windows.ps1
+ollama pull functiongemma
+ollama pull qwen3.5:4b
+.\.venv\Scripts\python.exe app.py
+
+SI SOLO QUIERES INSTALAR A MANO EN WINDOWS
+
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -r requirements.txt
+python -m pip install -r requirements-voice-windows.txt
+python verificar_entorno.py
+python app.py
+
+SI PYAUDIO FALLA EN WINDOWS
+La aplicacion seguira funcionando en modo manual y con Excel/TTS. Solo fallara el boton HABLAR (MIC).
+Prueba:
+
+python -m pip install PyAudio
+
+Si sigue fallando:
+1) Usa Python 3.11 o 3.12 en el .venv.
+2) Instala Microsoft C++ Build Tools.
+3) Repite: python -m pip install -r requirements-voice-windows.txt
+
+INSTALACION LINUX / RASPBERRY PI
+
+chmod +x instalar_modulos_linux_pi.sh
+./instalar_modulos_linux_pi.sh
+ollama pull functiongemma
+python app.py
+
+Equivalente manual:
+
+sudo apt update
+sudo apt install -y portaudio19-dev python3-pyaudio espeak alsa-utils
+python3 -m venv .venv --system-site-packages
+source .venv/bin/activate
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -r requirements.txt
+python verificar_entorno.py
+python app.py
+
+NOTA SOBRE PORTAUDIO19-DEV
+portaudio19-dev es para Linux/Raspberry Pi. No es un paso de Windows. En Windows se instala
+PyAudio con pip dentro del .venv.
+
+ROUTER SEMANTICO OPCIONAL
+Para enrutar prompts entre modelos locales, instala:
+
+python -m pip install -r requirements-router.txt
+
+Si no lo instalas, la app sigue funcionando con el flujo normal de FunctionGemma/Ollama.
+
+MODELOS OLLAMA
+Este paquete usa Ollama local. Debes tener Ollama abierto y los modelos descargados:
+
+ollama pull functiongemma
+ollama pull qwen3.5:4b
+ollama list
+
+VOZ Y TTS
+- HABLAR (MIC): requiere SpeechRecognition + PyAudio + microfono activo.
+- REPETIR VOZ: usa tts_piper.py. En Windows intenta pyttsx3 y luego System.Speech.
+
+COMANDOS DE DIAGNOSTICO
+
+python verificar_entorno.py
+.\ver_modulos_voz_tts.ps1
+.\ver_preentrenamiento.ps1

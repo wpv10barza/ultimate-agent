@@ -1,0 +1,10 @@
+ollama>=0.6.0
+pandas>=2.2.0
+openpyxl>=3.1.2
+pillow>=10.0.0
+SpeechRecognition>=3.10.0
+pyttsx3>=2.90
+
+# PyAudio is optional for the microphone button and is installed separately by scripts.
+# Windows: python -m pip install PyAudio
+# Linux/Pi: sudo apt install portaudio19-dev python3-pyaudio, then use .venv with --system-site-packages.

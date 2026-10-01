@@ -1,0 +1,45 @@
+MINEXcellence 2025 - Crear EXE en Windows
+==========================================
+
+Archivos agregados:
+- CREAR_EXE_WINDOWS.ps1
+- CREAR_EXE_WINDOWS.bat
+- requirements-exe.txt
+
+Uso recomendado:
+1) Descomprime el proyecto en una carpeta simple, por ejemplo:
+   <ruta-local>\ultimate agent
+
+2) Abre PowerShell en esa carpeta y ejecuta:
+   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+   .\CREAR_EXE_WINDOWS.ps1
+
+Tambien puedes hacer doble clic en:
+   CREAR_EXE_WINDOWS.bat
+
+Que hace el script:
+- Usa la carpeta actual del proyecto.
+- Crea o reutiliza .venv.
+- Instala requirements.txt.
+- Instala PyInstaller.
+- Crea un launcher temporal launcher_minexcellence_temp.py.
+- Compila con:
+  pyinstaller --clean --onefile --console --name="MINEXcellence_2025"
+- Empaqueta tools.json, training_data.jsonl y diccionario_minero.json.
+- Mueve el ejecutable final a la carpeta del proyecto.
+- Limpia build, dist, spec y el launcher temporal.
+
+Resultado esperado:
+   MINEXcellence_2025.exe
+
+Importante:
+- Ollama no se empaqueta dentro del EXE. Debe estar instalado y ejecutandose en Windows.
+- Antes de usar IA local, verifica:
+   ollama list
+   ollama pull functiongemma
+   ollama pull qwen3.5:4b
+
+Notas sobre voz:
+- PyAudio es opcional. Si falla, el EXE sigue funcionando para calculo, Excel, TTS y Ollama.
+- Para microfono, instala dentro de .venv:
+   .\.venv\Scripts\python.exe -m pip install -r requirements-voice-windows.txt
