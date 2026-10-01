@@ -1,0 +1,4 @@
+# Optional Windows voice dependencies for MINEXcellence.
+# Install after requirements.txt, inside .venv:
+#   python -m pip install -r requirements-voice-windows.txt
+PyAudio>=0.2.14
